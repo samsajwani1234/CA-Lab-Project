@@ -1,54 +1,36 @@
-main:
-    li s0, 0x100 #base address of array
+    addi  x18, x0, 0         # to track a[i] offset
+    add   x8,  x0, x0        # i iterator (starts at 0)
+    addi  x11, x0, 10        # loop bound n = 10
 
-    li t1, 9
-    sw t1, 0(s0)
+outerloop:
+    beq   x8,  x11, outerexit  # if i == n, exit
+    add   x29, x0, x8          # j iterator = i
 
-    li t1, 5
-    sw t1, 4(s0)
+    add   x19, x8, x0          
+    add   x19, x19, x19        
+    add   x19, x19, x19        # x19 = 4*x8 (byte offset)
 
-    li t1, 1
-    sw t1, 8(s0)
+innerloop:
+    beq   x29, x11, innerexit  # if j == n, inner loop done
+    addi  x29, x29, 1          # j++
+    addi  x19, x19, 8          # offset += 8
 
-    li t1, 4
-    sw t1, 12(s0)
+    lw    x26, 0(x18)          # load a[i]
+    lw    x27, 0(x19)          # load a[j]
 
-    li t1, 3
-    sw t1, 16(s0)
-    
-    li t1 2
-    sw t1 20(s0)
-    
-    li t1 10
-    sw t1 24(s0)
+    blt   x26, x27, bubblesort # if a[i] < a[j], swap
+    beq   x0,  x0, innerloop   # else continue
 
-    li t0, 7         # t0 = array size (n)
-    li t1, 1         # i = 1
+bubblesort:
+    add   x5,  x0, x26         # temp = a[i]
+    sw    x27, 0(x18)          # a[i] = a[j]
+    sw    x5,  0(x19)          # a[j] = temp
+    beq   x0,  x0, innerloop   # restart inner
 
-outer_loop:
-    bge t1, t0, end     # if i >= n, end
-    slli t4, t1, 2      # t4 = i * 4
-    add t4, s0, t4      # address of array[i]
-    lw t2, 0(t4)        # t2 = key = array[i]
-    addi t3, t1, -1     # j = i - 1
+innerexit:
+    addi  x8,  x8, 1           # i++
+    addi  x18, x18, 8          # offset += 8
+    beq   x0,  x0, outerloop   # back to outer
 
-inner_loop:
-    blt t3, zero, insert_key     # if j < 0, insert
-    slli t4, t3, 2
-    add t4, s0, t4
-    lw t5, 0(t4)                 # t5 = array[j]
-    ble t5, t2, insert_key
-    sw t5, 4(t4)                 # array[j+1] = array[j]
-    addi t3, t3, -1
-    j inner_loop
-
-insert_key:
-    slli t4, t3, 2
-    add t4, s0, t4
-    sw t2, 4(t4)                # array[j+1] = key
-    addi t1, t1, 1
-    j outer_loop
-
-end:
-    li a0, 10
-    ecall
+outerexit:
+    # done
