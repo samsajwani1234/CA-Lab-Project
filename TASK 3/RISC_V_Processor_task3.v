@@ -8,7 +8,6 @@ module RISC_V_Processor_task3(
   input wire[63:0] element5,
   input wire[63:0] element6,
   input wire[63:0] element7,
-  input wire[63:0] element8,
   input stall, flush);
   
   wire branch;
@@ -87,26 +86,26 @@ module RISC_V_Processor_task3(
   wire branch_final;
   
   
-  pipeline_flush p_flush
+  pipeline_flush pf1
   (
     .branch(branch_final & BRANCH),
     .flush(flush)
   );
   
   
-  hazard_detection_unit hu
+  hazard_detection_unit hdu
   (
     .Memread(Memread),
     .inst(inst_ifid_out),
     .Rd(RD),
-    .stall(stall)
+    .stall(stall) // generate stall if hazard detected
   );
 
   
-  Program_Counter_task3 pc 
+  Program_Counter_task3 pc3
   (
     .PC_in(pc_in),
-    .stall(stall),
+    .stall(stall), // freeze PC when stall==1
     .clk(clk),
     .reset(reset),
     .PC_out(pc_out)
@@ -126,7 +125,7 @@ module RISC_V_Processor_task3(
     .out(adderout1)
   );
   
-   ifidreg_task3 i1 
+   ifidreg_task3 if_id1
   (
     .clk(clk),
     .reset(reset),
@@ -187,7 +186,7 @@ module RISC_V_Processor_task3(
     .r22(r22)
   );
   
-  idexreg_task3 i2
+  idexreg_task3 id_ex
   (
     .clk(clk),
     .flush(flush),
@@ -224,7 +223,7 @@ module RISC_V_Processor_task3(
   
   Mux mux1
   (
-    .a(threeby1_out2),.b(d),.sel(Alusrc),.data_out(alu_64_b)
+    .a(threeby1_out2),.b(d),.s(Alusrc),.data_out(alu_64_b)
   );
   
   ALU_64_bit alu
@@ -245,7 +244,7 @@ module RISC_V_Processor_task3(
   
  
   
-  exmemreg_task3 i3
+  exmemreg_task3 ex_mem
   (
     .clk(clk),.reset(reset),.Adder_out(adderout2),.Result_in_alu(AluResult),.Zero_in(zero),.flush(flush),
     .writedata_in(threeby1_out2),.Rd_in(RD), .addermuxselect_in(addermuxselect),
@@ -268,18 +267,17 @@ module RISC_V_Processor_task3(
     .element4(element4),
     .element5(element5),
     .element6(element6),
-    .element7(element7),
-    .element8(element8)
-  );
+    .element7(element7)
+      );
   
   
   Mux mux2
   (
-    .a(adderout1),.b(exmem_out_adder),.sel(BRANCH & branch_final),.data_out(pc_in) // ??
+    .a(adderout1),.b(exmem_out_adder),.s(BRANCH & branch_final),.data_out(pc_in) // ??
   );
 
  
-  memwbreg_task3 i4
+  memwbreg_task3 mem_wb
   
   (
     .clk(clk),.reset(reset),.read_data_in(readdata),
@@ -289,11 +287,11 @@ module RISC_V_Processor_task3(
   
    Mux mux3
   (
-    .a(muxin2),.b(muxin1),.sel(memwb_memtoreg),.data_out(write_data)
+    .a(muxin2),.b(muxin1),.s(memwb_memtoreg),.data_out(write_data)
   );
   
   
-   forwardingunit f1
+   forwardingunit fu1
   (
     .RS_1(RS1),.RS_2(RS2),.rdMem(exmemrd),
     .rdWb(memwbrd),.regWrite_Wb(memwb_regwrite),
@@ -302,7 +300,7 @@ module RISC_V_Processor_task3(
   );
   
   
-  branching_unit branc
+  branching_unit bu1
   (
     .funct3(funct4_out[2:0]),.readData1(M1),.b(alu_64_b),.addermuxselect(addermuxselect)
   );
