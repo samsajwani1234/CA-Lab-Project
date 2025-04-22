@@ -25,14 +25,7 @@ module RISC_V_processor_task2(
     output wire [3:0] operation,
     output wire [63:0] aluout,
     output wire [63:0] datamemoryreaddata,
-    output wire [63:0] element1,
-    output wire [63:0] element2,
-    output wire [63:0] element3,
-    output wire [63:0] element4,
-    output wire [63:0] element5,
-    output wire [63:0] element6,
-    output wire [63:0] element7,
-    output wire [63:0] element8,
+    output wire [63:0] element1,element2,element3,element4,element5,element6,element7,
     
     output wire [63:0] ifidpc_out,
     output wire [31:0] ifidinst,
@@ -73,7 +66,7 @@ module RISC_V_processor_task2(
     
     Adder a1(pc_out, 64'd4, adder1_out);
     
-    ifidreg ifid(clk, reset, pc_out, instruction, ifidpc_out, ifidinst);
+    ifidreg if_id(clk, reset, pc_out, instruction, ifidpc_out, ifidinst);
     
     InsParser ip(ifidinst, opcode, rd, funct3, rs1, rs2, funct7);
     Control_Unit cu(opcode, branch, memread, memtoreg, memwrite, alusrc, regwrite, aluop);
@@ -96,10 +89,10 @@ module RISC_V_processor_task2(
     Mux m2(m3to1out2, ideximmdata, idexalusrc, mux2out);
     
     ALU_64_bit alu(m3to1out1, mux2out, operation, aluout, zero);
-    ALU_Control alu_c(idexaluop, idexfunct, operation);
+    ALU_Control alu_control(idexaluop, idexfunct, operation);
     
     
-    exmemreg exmem( clk,reset,
+    exmemreg ex_mem( clk,reset,
        adder2_out, 
        aluout, 
        zero,
@@ -115,10 +108,10 @@ module RISC_V_processor_task2(
        exmembranch, exmemmemread, exmemmemtoreg, exmemmemwrite, exmemregwrite,
        branch_finale);
     
-    Data_Memory dm(exmemaluout, exmemwritedataout, clk, exmemmemwrite, exmemmemread, datamemoryreaddata,element1,element2,element3,element4,element5,element6,element7,element8);
+    Data_Memory dm(exmemaluout, exmemwritedataout, clk, exmemmemwrite, exmemmemread, datamemoryreaddata,element1,element2,element3,element4,element5,element6,element7);
     Mux m1(adder1_out, exmemadderout,(exmembranch&&branch_finale) , pc_in);
     
-    memwbreg memwb(clk, reset, datamemoryreaddata, exmemaluout, exmemrd, exmemmemtoreg, exmemregwrite, memwbreaddataout, memwbaluout, memwbrd, memwbmemtoreg, memwbregwrite);
+    memwbreg mem_wb(clk, reset, datamemoryreaddata, exmemaluout, exmemrd, exmemmemtoreg, exmemregwrite, memwbreaddataout, memwbaluout, memwbrd, memwbmemtoreg, memwbregwrite);
     
     Mux m3(memwbaluout, memwbreaddataout, memwbmemtoreg, writedata);
     

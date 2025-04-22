@@ -27,8 +27,7 @@ module tb_RISC_V_processor_task2;
     wire [3:0] operation;
     wire [63:0] aluout;
     wire [63:0] datamemoryreaddata;
-    wire [63:0] element1, element2, element3, element4;
-    wire [63:0] element5, element6, element7, element8;
+    wire [63:0] element1, element2, element3, element4, element5, element6, element7;
 
     wire [63:0] ifidpc_out;
     wire [31:0] ifidinst;
@@ -36,7 +35,7 @@ module tb_RISC_V_processor_task2;
     wire idexmemwrite, idexregwrite;
     wire [63:0] memwbreaddataout, memwbaluout;
 
-    RISC_V_processor_task2 uut (
+    RISC_V_processor_task2 r2(
         .clk(clk),
         .reset(reset),
         .pc_out(pc_out),
@@ -73,7 +72,6 @@ module tb_RISC_V_processor_task2;
         .element5(element5),
         .element6(element6),
         .element7(element7),
-        .element8(element8),
         .ifidpc_out(ifidpc_out),
         .ifidinst(ifidinst),
         .idexrs1(idexrs1),
