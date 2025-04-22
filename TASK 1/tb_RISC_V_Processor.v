@@ -27,10 +27,9 @@ module tb_RISC_V_processor;
     wire [3:0] operation;
     wire [63:0] aluout;
     wire [63:0] datamemoryreaddata;
-    wire [63:0] element1, element2, element3, element4;
-    wire [63:0] element5, element6, element7, element8;
+    wire [63:0] element1, element2, element3, element4,element5, element6, element7;
 
-    RISC_V_processor uut (
+    RISC_V_processor r1(
         .clk(clk),
         .reset(reset),
         .pc_out(pc_out),
@@ -66,8 +65,7 @@ module tb_RISC_V_processor;
         .element4(element4),
         .element5(element5),
         .element6(element6),
-        .element7(element7),
-        .element8(element8)
+        .element7(element7)
     );
 
     initial begin
